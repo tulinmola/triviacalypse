@@ -1,13 +1,23 @@
 <template>
   <div class="home">
-    <h2>{{ title }}</h2>
+    <ul class="buttons">
+      <li>
+        <a href="#" @click.prevent="newGame" class="button button-primary">New Game</a>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script lang="coffee">
+import uuid from "../uuid"
+
 export default
   data: ->
     title: "home"
+
+  methods:
+    newGame: ->
+      @$router.push(name: "game", params: {id: uuid()})
 </script>
 
 <style lang="scss">

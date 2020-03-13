@@ -9,9 +9,10 @@ defmodule Triviacalypse.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      TriviacalypseWeb.Endpoint
+      TriviacalypseWeb.Endpoint,
       # Starts a worker by calling: Triviacalypse.Worker.start_link(arg)
       # {Triviacalypse.Worker, arg},
+      Triviacalypse.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

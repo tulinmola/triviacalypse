@@ -3,5 +3,5 @@ import Game from "../components/game"
 
 export default [
   {path: "/", component: Home, name: "home"}
-  {path: "/game", component: Game, name: "game"}
+  {path: "/game/:id", component: Game, name: "game"}
 ]
