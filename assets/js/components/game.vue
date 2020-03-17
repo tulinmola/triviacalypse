@@ -1,54 +1,28 @@
 <template>
   <div class="game">
     <h2>Game</h2>
-    <form @on:submit.prevent>
-      <div class="field">
-        <label for="usermane">Username</label>
-        <input type="text" v-model="username" @change="updateUsername"/>
-      </div>
-    </form>
-    <ul class="users">
-      <li v-for="user in users" :key="user.id">
-        {{ user.username }} ({{ user.count }})
+
+    <ul v-if="players" class="players">
+      <li v-for="player in players" :key="player.id">
+        <dl><dt>{{player.id}} {{ player.username }}</dt><dd>{{ player.score }}</dd></dl>
       </li>
     </ul>
+    <p v-else>Loading players…</p>
   </div>
 </template>
 
 <script lang="coffee">
-import {Presence} from "phoenix"
 import socket from "../socket"
 import storage from "../storage"
-
-NAMES = [
-  "bat", "bear", "bird", "bone", "bull", "camel", "cat", "cow", "crab", "crocodile", "dog", "dolphin",
-  "elephant", "elk", "fish", "fox", "frog", "giraffe", "gorilla", "jellyfish", "kangaroo", "lemur",
-  "lion", "monkey", "octopus", "owl", "panda", "panther", "parrot", "paw", "pelican", "penguin", "pig",
-  "pigeon", "rhino", "rooster", "seahorse", "seal", "shrimp", "snail", "snake", "squid", "squirrel",
-  "tiger", "turtle", "whale", "woodpecker", "zebra"
-]
-
-randomName = ->
-  index = parseInt(Math.random() * NAMES.length)
-  NAMES[index]
+import _ from "lodash"
 
 export default
   data: ->
     channel: null
-    users: []
-    username: randomName()
+    players: null
 
   mounted: ->
-    payload = {@username, user_id: @userId}
-    @channel = socket.channel("game:#{@id}", payload)
-
-    @channel.join()
-      .receive("ok", @onJoin)
-      .receive("error", @onChannelError)
-    @updateUsername()
-
-    @presence = new Presence(@channel)
-    @presence.onSync(@onPresenceSync)
+    @$nextTick => @join()
 
   beforeDestroy: ->
     @channel.leave()
@@ -57,26 +31,36 @@ export default
     id: ->
       @$route.params.id
 
-    userId: ->
-      storage.getUserId()
+    currentUser: ->
+      storage.getCurrentUser()
 
   methods:
-    onJoin: (_response) ->
-      console.log "join"
+    join: ->
+      payload =
+        user_id: @currentUser.id
+        username: @currentUser.username
+
+      @channel = socket.channel("game:#{@id}", payload)
+
+      @channel.join()
+        .receive("ok", @onJoin)
+        .receive("error", @onChannelError)
+
+      @channel.on("add_player", @addPlayer)
+      @channel.on("update_player", @updatePlayer)
+
+    onJoin: (response) ->
+      {@players} = response
 
     onChannelError: (response) ->
       console.error "error", response
 
-    onPresenceSync: (presence) ->
-      users = []
-      @presence.list (id, {metas: [first, ...rest]}) ->
-        count = rest.length + 1
-        {username} = first
-        users.push({id, username, count})
-      @users = users
+    addPlayer: (player) ->
+      @players.push(player) unless _.find(@players, id: player.id)
 
-    updateUsername: ->
-      @channel.push("update", {@username})
+    updatePlayer: (player) ->
+      current = _.find(@players, id: player.id)
+      _.extend(current, player) if current?
 </script>
 
 <style lang="scss">

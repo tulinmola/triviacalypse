@@ -1,11 +1,57 @@
 defmodule TriviacalypseWeb.GameChannelTest do
   use TriviacalypseWeb.ChannelCase
 
-  setup do
-    {:ok, _, socket} =
-      socket(TriviacalypseWeb.UserSocket, "user_id", %{some: :assign})
-      |> subscribe_and_join(TriviacalypseWeb.GameChannel, "game:lobby")
+  alias Triviacalypse.{Game, Player}
+  alias TriviacalypseWeb.{GameChannel, UserSocket}
 
-    {:ok, socket: socket}
+  setup %{} do
+    Triviacalypse.GameRepo.delete_all()
+  end
+
+  test "joning to lobby gets all games" do
+    first = create_game()
+    second = create_game()
+
+    assert {:ok, %{games: games}, socket} =
+             UserSocket
+             |> socket("user_id", %{some: :assign})
+             |> subscribe_and_join(GameChannel, "game:lobby")
+
+    assert Enum.count(games) == 2
+    assert Enum.find(games, &(&1.id == first.id))
+    assert Enum.find(games, &(&1.id == second.id))
+  end
+
+  test "joning game gets all players and adds the new one" do
+    first = create_player()
+    second = create_player()
+    game = create_game([first, second])
+
+    payload = %{user_id: UUID.uuid4(), username: "test"}
+
+    assert {:ok, %{players: players}, socket} =
+             UserSocket
+             |> socket("user_id", %{some: :assign})
+             |> subscribe_and_join(GameChannel, "game:#{game.id}", payload)
+
+    assert Enum.count(players) == 2
+    assert Enum.find(players, &(&1.id == first.id))
+    assert Enum.find(players, &(&1.id == second.id))
+  end
+
+  defp create_game(players \\ []) do
+    {:ok, game} =
+      %Game{
+        id: UUID.uuid4(),
+        player_count: length(players),
+        players: Map.new(players, &{&1.id, &1})
+      }
+      |> Triviacalypse.create_game()
+
+    game
+  end
+
+  defp create_player do
+    %Player{id: UUID.uuid4(), username: UUID.uuid4()}
   end
 end

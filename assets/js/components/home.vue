@@ -1,5 +1,21 @@
 <template>
   <div class="home">
+    <form @on:submit.prevent>
+      <div class="field">
+        <label for="usermane">Username</label>
+        <input type="text" v-model="username" @change="updateUsername"/>
+      </div>
+    </form>
+
+    <ul v-if="games" class="games">
+      <li v-for="game in games" :key="game.id">
+        <router-link :to="{name: 'game', params: {id: game.id}}">
+          {{ game.id }} ({{ game.player_count }})
+        </router-link>
+      </li>
+    </ul>
+    <p v-else>Loading games…</p>
+
     <ul class="buttons">
       <li>
         <a href="#" @click.prevent="newGame" class="button button-primary">New Game</a>
@@ -9,15 +25,60 @@
 </template>
 
 <script lang="coffee">
-import uuid from "../uuid"
+import storage from "../storage"
+import socket from "../socket"
+import api from "../api"
+import _ from "lodash"
 
 export default
   data: ->
-    title: "home"
+    username: null
+    games: null
+
+  mounted: ->
+    @$nextTick =>
+      @join()
+      @setUsername()
+
+  computed:
+    currentUser: ->
+      storage.getCurrentUser()
 
   methods:
+    join: ->
+      @channel = socket.channel("game:lobby", {})
+
+      @channel.join()
+        .receive("ok", @onJoin)
+        .receive("error", @onChannelError)
+
+      @channel.on("add_game", @addGame)
+      @channel.on("update_game", @updateGame)
+
+    setUsername: ->
+      {@username} = @currentUser
+
+    updateUsername: ->
+      updatedUser = _.merge(@currentUser, username: @username)
+      storage.setCurrentUser(updatedUser)
+
+    onJoin: (response) ->
+      {@games} = response
+
+    onChannelError: (response) ->
+      console.error "error", response
+
+    addGame: (game) ->
+      @games.push(game) unless _.find(@games, id: game.id)
+
+    updateGame: (game) ->
+      current = _.find(@games, id: game.id)
+      _.extend(current, game) if current?
+
     newGame: ->
-      @$router.push(name: "game", params: {id: uuid()})
+      params = {}
+      api.createGame(params).then (game) =>
+        @$router.push(name: "game", params: {id: game.id})
 </script>
 
 <style lang="scss">

@@ -19,8 +19,9 @@ defmodule TriviacalypseWeb.Router do
     get "/", PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", TriviacalypseWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", TriviacalypseWeb do
+    pipe_through :api
+
+    resources "/games", GameController, only: [:create]
+  end
 end
