@@ -1,12 +1,15 @@
-defmodule Triviacalypse.Api do
+defmodule Triviacalypse.OpentdbApi do
   use HTTPoison.Base
 
   alias Triviacalypse.Question
 
-  @endpoint "https://opentdb.com/api.php"
+  @type question :: Question.t()
 
+  @endpoint "https://opentdb.com"
+
+  @spec get :: {:ok, question} | {:error, any}
   def get do
-    case get("?amount=1") do
+    case get("/api.php?amount=1") do
       {:ok, %HTTPoison.Response{body: body}} -> {:ok, body}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, reason}
     end

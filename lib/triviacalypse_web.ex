@@ -24,6 +24,7 @@ defmodule TriviacalypseWeb do
       import Plug.Conn
       import TriviacalypseWeb.Gettext
       alias TriviacalypseWeb.Router.Helpers, as: Routes
+      alias TriviacalypseWeb.GetGamePlug, as: GetGame
     end
   end
 

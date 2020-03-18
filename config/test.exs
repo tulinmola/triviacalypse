@@ -8,3 +8,6 @@ config :triviacalypse, TriviacalypseWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+# Trivia question API
+config :triviacalypse, Triviacalypse.GameServer, api: Triviacalypse.QuestionTestApi

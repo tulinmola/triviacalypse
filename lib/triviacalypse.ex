@@ -24,6 +24,14 @@ defmodule Triviacalypse do
     |> create_game()
   end
 
+  @spec start_game(binary) :: :ok | {:error, any}
+  def start_game(id) do
+    case get_game(id) do
+      {:ok, pid} -> GameServer.start(pid)
+      {:error, error} -> {:error, error}
+    end
+  end
+
   @spec get_game(binary) :: {:ok, pid} | {:error, any}
   def get_game(id) do
     case GameRepo.get(id) do

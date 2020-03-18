@@ -52,8 +52,7 @@ export default
         .receive("ok", @onJoin)
         .receive("error", @onChannelError)
 
-      @channel.on("add_game", @addGame)
-      @channel.on("update_game", @updateGame)
+      @channel.on("game", @onGame)
 
     setUsername: ->
       {@username} = @currentUser
@@ -68,12 +67,15 @@ export default
     onChannelError: (response) ->
       console.error "error", response
 
-    addGame: (game) ->
-      @games.push(game) unless _.find(@games, id: game.id)
+    findGame: (id) ->
+      _.find(@games, id: id)
 
-    updateGame: (game) ->
-      current = _.find(@games, id: game.id)
-      _.extend(current, game) if current?
+    onGame: (game) ->
+      current = @findGame(game.id)
+      if current?
+        _.extend(current, game)
+      else
+        @games.unshift(game)
 
     newGame: ->
       params = {}

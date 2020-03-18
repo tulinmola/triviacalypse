@@ -8,18 +8,29 @@
       </li>
     </ul>
     <p v-else>Loading players…</p>
+
+    <question v-if="question" :question="question"/>
+
+    <ul class="buttons">
+      <li>
+        <a href="#" @click.prevent="start" :class="startButtonClass">Start</a>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script lang="coffee">
 import socket from "../socket"
 import storage from "../storage"
+import api from "../api"
 import _ from "lodash"
+import Question from "./question"
 
 export default
   data: ->
     channel: null
     players: null
+    question: null
 
   mounted: ->
     @$nextTick => @join()
@@ -31,8 +42,18 @@ export default
     id: ->
       @$route.params.id
 
+    game: ->
+      id: @id
+
     currentUser: ->
       storage.getCurrentUser()
+
+    startButtonClass: ->
+      notAlone = @players?.length > 1
+
+      button: true
+      "button-primary": notAlone
+      "button-secondary": !notAlone
 
   methods:
     join: ->
@@ -46,8 +67,8 @@ export default
         .receive("ok", @onJoin)
         .receive("error", @onChannelError)
 
-      @channel.on("add_player", @addPlayer)
-      @channel.on("update_player", @updatePlayer)
+      @channel.on("player", @onPlayer)
+      @channel.on("question", @onQuestion)
 
     onJoin: (response) ->
       {@players} = response
@@ -55,12 +76,23 @@ export default
     onChannelError: (response) ->
       console.error "error", response
 
-    addPlayer: (player) ->
-      @players.push(player) unless _.find(@players, id: player.id)
+    findPlayer: (id) ->
+      _.find(@players, id: id)
 
-    updatePlayer: (player) ->
-      current = _.find(@players, id: player.id)
-      _.extend(current, player) if current?
+    onPlayer: (player) ->
+      current = @findPlayer(player.id)
+      if current?
+        _.extend(current, player)
+      else
+        @players.unshift(player)
+
+    onQuestion: (@question) ->
+
+    start: ->
+      api.startGame(@game)
+
+  components:
+    "question": Question
 </script>
 
 <style lang="scss">

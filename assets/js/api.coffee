@@ -24,3 +24,5 @@ doDelete = (path, params) ->
 
 export default
   createGame: (params) -> post("/games", {game: params})
+
+  startGame: (game) -> post("/games/#{game.id}/start")

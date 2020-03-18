@@ -13,7 +13,11 @@ defmodule Triviacalypse.GameServerTest do
     %{game: game} = create_game()
     id = game.id
 
-    assert_receive %Broadcast{topic: @lobby_topic, event: "add_game", payload: %{id: ^id}}
+    assert_receive %Broadcast{
+      topic: @lobby_topic,
+      event: "game",
+      payload: %{id: ^id}
+    }
   end
 
   test "add player broadcasts to game channel and lobby" do
@@ -27,11 +31,15 @@ defmodule Triviacalypse.GameServerTest do
     player_id = player.id
     game_id = game.id
 
-    assert_receive %Broadcast{topic: ^topic, event: "add_player", payload: %{id: ^player_id}}
+    assert_receive %Broadcast{
+      topic: ^topic,
+      event: "player",
+      payload: %{id: ^player_id}
+    }
 
     assert_receive %Broadcast{
       topic: @lobby_topic,
-      event: "update_game",
+      event: "game",
       payload: %{id: ^game_id, player_count: 1}
     }
   end
@@ -46,6 +54,24 @@ defmodule Triviacalypse.GameServerTest do
     assert Enum.count(players) == 2
     assert Enum.find(players, &(&1.id == first.id))
     assert Enum.find(players, &(&1.id == second.id))
+  end
+
+  test "start game and send question to players" do
+    %{pid: pid} = create_game()
+    topic = game_topic(pid)
+
+    assert :ok = GameServer.start(pid)
+
+    assert_receive %Broadcast{
+      topic: ^topic,
+      event: "question",
+      payload: %{text: _text}
+    }
+  end
+
+  defp game_topic(pid) do
+    game = GameServer.game(pid)
+    "game:#{game.id}"
   end
 
   defp create_game(players \\ []) do

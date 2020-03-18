@@ -22,6 +22,8 @@ defmodule TriviacalypseWeb.Router do
   scope "/api", TriviacalypseWeb do
     pipe_through :api
 
-    resources "/games", GameController, only: [:create]
+    resources "/games", GameController, only: [:create] do
+      resources "/start", StartController, only: [:create]
+    end
   end
 end

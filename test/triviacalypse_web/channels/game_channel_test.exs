@@ -1,7 +1,7 @@
 defmodule TriviacalypseWeb.GameChannelTest do
   use TriviacalypseWeb.ChannelCase
 
-  alias Triviacalypse.{Game, Player}
+  alias Triviacalypse.Fixtures
   alias TriviacalypseWeb.{GameChannel, UserSocket}
 
   setup %{} do
@@ -9,8 +9,8 @@ defmodule TriviacalypseWeb.GameChannelTest do
   end
 
   test "joning to lobby gets all games" do
-    first = create_game()
-    second = create_game()
+    first = Fixtures.create_game()
+    second = Fixtures.create_game()
 
     assert {:ok, %{games: games}, socket} =
              UserSocket
@@ -23,9 +23,9 @@ defmodule TriviacalypseWeb.GameChannelTest do
   end
 
   test "joning game gets all players and adds the new one" do
-    first = create_player()
-    second = create_player()
-    game = create_game([first, second])
+    first = Fixtures.create_player()
+    second = Fixtures.create_player()
+    game = Fixtures.create_game([first, second])
 
     payload = %{user_id: UUID.uuid4(), username: "test"}
 
@@ -37,21 +37,5 @@ defmodule TriviacalypseWeb.GameChannelTest do
     assert Enum.count(players) == 2
     assert Enum.find(players, &(&1.id == first.id))
     assert Enum.find(players, &(&1.id == second.id))
-  end
-
-  defp create_game(players \\ []) do
-    {:ok, game} =
-      %Game{
-        id: UUID.uuid4(),
-        player_count: length(players),
-        players: Map.new(players, &{&1.id, &1})
-      }
-      |> Triviacalypse.create_game()
-
-    game
-  end
-
-  defp create_player do
-    %Player{id: UUID.uuid4(), username: UUID.uuid4()}
   end
 end

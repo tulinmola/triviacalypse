@@ -2,7 +2,7 @@ defmodule Triviacalypse.GameServer do
   use GenServer, restart: :transient
 
   alias Triviacalypse.{Game, GameServer, Player}
-  alias TriviacalypseWeb.{Endpoint, GameView, PlayerView}
+  alias TriviacalypseWeb.{Endpoint, GameView, PlayerView, QuestionView}
 
   @type game :: Game.t()
   @type player :: Player.t()
@@ -15,6 +15,7 @@ defmodule Triviacalypse.GameServer do
   defstruct [:game, :topic]
 
   @lobby_topic "game:lobby"
+  @api Application.get_env(:triviacalypse, GameServer)[:api]
 
   @spec start_link([{:game, game}]) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -37,6 +38,11 @@ defmodule Triviacalypse.GameServer do
     GenServer.call(pid, :game)
   end
 
+  @spec start(pid) :: :ok
+  def start(pid) do
+    GenServer.cast(pid, :start)
+  end
+
   @spec kill(pid) :: :ok
   def kill(pid) do
     GenServer.call(pid, :kill)
@@ -48,7 +54,7 @@ defmodule Triviacalypse.GameServer do
     topic = "game:#{game.id}"
     server = %GameServer{game: game, topic: topic}
 
-    broadcast_game!(server, "add_game", game)
+    broadcast_game!(server, game)
 
     {:ok, server}
   end
@@ -65,8 +71,8 @@ defmodule Triviacalypse.GameServer do
   def handle_call({:add_player, player}, _from, server) do
     unless Game.player?(server.game, player) do
       game = Game.add_player(server.game, player)
-      broadcast_player!(server, "add_player", player)
-      broadcast_game!(server, "update_game", game)
+      broadcast_player!(server, player)
+      broadcast_game!(server, game)
       {:reply, player, %GameServer{server | game: game}}
     else
       {:reply, player, server}
@@ -85,17 +91,29 @@ defmodule Triviacalypse.GameServer do
   end
 
   @impl true
+  def handle_cast(:start, server) do
+    {:ok, question} = @api.get()
+    broadcast_question!(server, question)
+    {:noreply, server}
+  end
+
+  @impl true
   def terminate(_reason, _server) do
     # IO.inspect({:terminate, reason, server})
   end
 
-  defp broadcast_game!(_server, event, game) do
+  defp broadcast_game!(_server, game) do
     message = GameView.render("game.json", %{game: game})
-    :ok = Endpoint.broadcast(@lobby_topic, event, message)
+    :ok = Endpoint.broadcast(@lobby_topic, "game", message)
   end
 
-  defp broadcast_player!(server, event, player) do
+  defp broadcast_player!(server, player) do
     message = PlayerView.render("player.json", %{player: player})
-    :ok = Endpoint.broadcast(server.topic, event, message)
+    :ok = Endpoint.broadcast(server.topic, "player", message)
+  end
+
+  defp broadcast_question!(server, question) do
+    message = QuestionView.render("question.json", %{question: question})
+    :ok = Endpoint.broadcast(server.topic, "question", message)
   end
 end
