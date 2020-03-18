@@ -11,11 +11,9 @@
 
     <question v-if="question" :question="question"/>
 
-    <ul class="buttons">
-      <li>
-        <a href="#" @click.prevent="start" :class="startButtonClass">Start</a>
-      </li>
-    </ul>
+    <t-buttons>
+      <t-button @action="start">Start</t-button>
+    </t-buttons>
   </div>
 </template>
 

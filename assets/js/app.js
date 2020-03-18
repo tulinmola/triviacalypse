@@ -7,5 +7,11 @@ import VueRouter  from "vue-router"
 
 Vue.use(VueRouter)
 
+import Buttons from "./components/buttons"
+import Button from "./components/button"
+
+Vue.component("t-buttons", Buttons)
+Vue.component("t-button", Button)
+
 import Page from "./pages"
 window.vm = new Vue(Page)

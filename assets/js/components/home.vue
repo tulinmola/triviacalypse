@@ -16,11 +16,9 @@
     </ul>
     <p v-else>Loading games…</p>
 
-    <ul class="buttons">
-      <li>
-        <a href="#" @click.prevent="newGame" class="button button-primary">New Game</a>
-      </li>
-    </ul>
+    <t-buttons>
+      <t-button @action="newGame">New Game</t-button>
+    </t-buttons>
   </div>
 </template>
 
