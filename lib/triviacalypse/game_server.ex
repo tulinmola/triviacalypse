@@ -1,7 +1,7 @@
 defmodule Triviacalypse.GameServer do
   use GenServer, restart: :transient
 
-  alias Triviacalypse.{Game, GameServer, Player}
+  alias Triviacalypse.{Game, GameServer, Player, QuestionPool}
   alias TriviacalypseWeb.{Endpoint, GameView, PlayerView, QuestionView}
 
   @type game :: Game.t()
@@ -15,7 +15,6 @@ defmodule Triviacalypse.GameServer do
   defstruct [:game, :topic]
 
   @lobby_topic "game:lobby"
-  @api Application.get_env(:triviacalypse, GameServer)[:api]
 
   @spec start_link([{:game, game}]) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -92,7 +91,7 @@ defmodule Triviacalypse.GameServer do
 
   @impl true
   def handle_cast(:start, server) do
-    {:ok, question} = @api.get()
+    {:ok, question} = QuestionPool.get()
     broadcast_question!(server, question)
     {:noreply, server}
   end

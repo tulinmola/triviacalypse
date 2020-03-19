@@ -5,11 +5,12 @@ defmodule Triviacalypse.OpentdbApi do
 
   @type question :: Question.t()
 
+  @amount 25
   @endpoint "https://opentdb.com"
 
-  @spec get :: {:ok, question} | {:error, any}
+  @spec get :: {:ok, [question]} | {:error, any}
   def get do
-    case get("/api.php?amount=1") do
+    case get("/api.php?amount=#{@amount}") do
       {:ok, %HTTPoison.Response{body: body}} -> {:ok, body}
       {:error, %HTTPoison.Error{reason: reason}} -> {:error, reason}
     end
@@ -25,7 +26,6 @@ defmodule Triviacalypse.OpentdbApi do
     body
     |> Jason.decode!()
     |> Map.get("results")
-    |> Enum.at(0)
-    |> Question.new()
+    |> Enum.map(&Question.new/1)
   end
 end

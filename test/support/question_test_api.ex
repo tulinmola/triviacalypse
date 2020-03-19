@@ -3,6 +3,11 @@ defmodule Triviacalypse.QuestionTestApi do
 
   @type question :: Question.t()
 
-  @spec get :: {:ok, question}
-  def get, do: {:ok, Fixtures.create_question()}
+  @amount 25
+
+  @spec get :: {:ok, [question]} | {:error, any}
+  def get do
+    questions = Enum.map(1..@amount, fn _ -> Fixtures.create_question() end)
+    {:ok, questions}
+  end
 end

@@ -10,6 +10,7 @@ defmodule Triviacalypse.Application do
     children = [
       # Start the endpoint when the application starts
       TriviacalypseWeb.Endpoint,
+      {Triviacalypse.QuestionPool, []},
       {Registry, keys: :unique, name: Triviacalypse.GameRegistry},
       {DynamicSupervisor, strategy: :one_for_one, name: Triviacalypse.GameSupervisor}
     ]
