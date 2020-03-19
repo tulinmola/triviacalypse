@@ -16,6 +16,9 @@ defmodule Triviacalypse.GameRepo do
 
   @spec insert(game) :: {:ok, pid} | {:error, any}
   def insert(game) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    game = %Game{game | inserted_at: now}
+
     child_spec = {GameServer, game: game, name: via_name(game.id)}
 
     case DynamicSupervisor.start_child(GameSupervisor, child_spec) do

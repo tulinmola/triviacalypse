@@ -25,7 +25,7 @@ defmodule TriviacalypseWeb.GameChannelTest do
   test "joning game gets all players and adds the new one" do
     first = Fixtures.create_player()
     second = Fixtures.create_player()
-    game = Fixtures.create_game([first, second])
+    game = Fixtures.create_game(%{players: [first, second]})
 
     payload = %{user_id: UUID.uuid4(), username: "test"}
 

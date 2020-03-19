@@ -1,6 +1,6 @@
 <template>
-  <li>
-    <a :class="`button button-${type}`" href="#" @click.prevent="$emit('action')">
+  <li :class="klass">
+    <a href="#" @click.prevent="$emit('action')">
       <slot></slot>
     </a>
   </li>
@@ -10,10 +10,66 @@
 export default
   props:
     type: default: "primary"
+
+  computed:
+    types: ->
+      @type.split(" ")
+
+    klass: ->
+      typeKlasses = @types.map (type) -> "button-#{type}"
+      ["button"].concat(typeKlasses)
 </script>
 
-<style>
+<style lang="scss">
 .button {
-  background-color: #ff0;
+  border-radius: $button-height * 0.5;
+  margin: $padding 0;
+  transition: color $transition-time, background-color $transition-time;
+
+  a {
+    display: block;
+    height: $button-height;
+    line-height: $button-height;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    font-weight: $medium-weight;
+  }
+
+  &:active {
+    animation: click-animation 0.4s;
+  }
+}
+
+.button-primary {
+  background-color: $accent-color;
+  border: 1px solid $accent-color;
+  color: $inverted-primary-color;
+
+  &:hover, &:active {
+    background-color: $background-color;
+    color: $accent-color;
+  }
+}
+
+.button-secondary {
+  border: 1px solid $accent-color;
+  background-color: $background-color;
+  color: $accent-color;
+
+  &:hover, &:active {
+    background-color: $accent-color;
+    color: $inverted-primary-color;
+  }
+
+  &.button-danger {
+    color: $danger-color;
+    border-color: $danger-color;
+
+    &:hover, &:active {
+      background-color: $danger-color;
+      color: $inverted-primary-color;
+    }
+  }
 }
 </style>

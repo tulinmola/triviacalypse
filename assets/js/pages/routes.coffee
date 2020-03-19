@@ -1,5 +1,5 @@
-import Home from "../components/home"
-import Game from "../components/game"
+import Home from "./home"
+import Game from "./game"
 
 export default [
   {path: "/", component: Home, name: "home"}

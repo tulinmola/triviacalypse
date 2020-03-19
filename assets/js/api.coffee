@@ -1,4 +1,5 @@
 import axios from "axios"
+import storage from "./storage"
 
 apiUrl = (path) ->
   "/api#{path}"
@@ -23,6 +24,11 @@ doDelete = (path, params) ->
   axiosCall(path, params, "delete")
 
 export default
-  createGame: (params) -> post("/games", {game: params})
+  createGame: (params) ->
+    user = storage.getCurrentUser()
+    params = _.merge params,
+      creator_id: user.id
+      creator_username: user.username
+    post("/games", game: params)
 
   startGame: (game) -> post("/games/#{game.id}/start")

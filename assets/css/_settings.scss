@@ -1,0 +1,26 @@
+$margin: 32px;
+$padding: 16px;
+
+$button-height: 48px;
+
+
+$base-color: #fff;
+$accent-color: #3f3faf;
+$neutral-color: #00f;
+
+$primary-color: #14143f;
+$secondary-color: rgba($primary-color, 0.6);
+
+$success-color: #5da55d;
+$danger-color: #b84444;
+
+$background-color: #fff;
+$placeholder-color: mix($background-color, $primary-color, 95%);
+
+$inverted-primary-color: #fff;
+
+$regular-weight: 400;
+$medium-weight: 600;
+$bold-weight: 700;
+
+$transition-time: 0.3s;

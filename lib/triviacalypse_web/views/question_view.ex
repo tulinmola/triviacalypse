@@ -7,6 +7,7 @@ defmodule TriviacalypseWeb.QuestionView do
     %{
       category: question.category,
       difficulty: question.difficulty,
+      score: question.score,
       text: question.text,
       answers: answers
     }

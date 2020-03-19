@@ -48,7 +48,18 @@ module.exports = (env, options) => ({
       },
       {
         test: /\.s?css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              data: `
+                @import "./css/_settings.scss";
+              `
+            }
+          }
+        ]
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,

@@ -1,3 +1,5 @@
+import _ from "lodash"
+
 NAMES = [
   "bat", "bear", "bird", "bone", "bull", "camel", "cat", "cow", "crab", "crocodile", "dog", "dolphin",
   "elephant", "elk", "fish", "fox", "frog", "giraffe", "gorilla", "jellyfish", "kangaroo", "lemur",
@@ -9,4 +11,4 @@ NAMES = [
 export default
   random: ->
     index = parseInt(Math.random() * NAMES.length)
-    NAMES[index]
+    _.capitalize(NAMES[index])

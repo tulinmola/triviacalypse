@@ -2,18 +2,35 @@ defmodule Triviacalypse.Game do
   alias Triviacalypse.{Game, Player}
 
   @type player :: Player.t()
+  @type datetime :: DateTime.t()
 
   @type t :: %Game{
           id: binary,
+          creator_id: binary,
+          creator_username: binary,
+          inserted_at: datetime,
           player_count: integer,
           players: map
         }
 
-  defstruct id: "", player_count: 0, players: %{}
+  @default_inserted_at {{2020, 1, 30}, {0, 0, 0}}
+                       |> NaiveDateTime.from_erl!()
+                       |> DateTime.from_naive!("Etc/UTC")
+
+  defstruct id: "",
+            creator_id: "",
+            creator_username: "",
+            inserted_at: @default_inserted_at,
+            player_count: 0,
+            players: %{}
 
   @spec new(map) :: t
-  def new(_attrs) do
-    %Game{id: UUID.uuid4()}
+  def new(attrs) do
+    %Game{
+      id: UUID.uuid4(),
+      creator_id: Map.get(attrs, "creator_id", ""),
+      creator_username: Map.get(attrs, "creator_username", "Annonymous")
+    }
   end
 
   @spec add_player(t, player) :: t

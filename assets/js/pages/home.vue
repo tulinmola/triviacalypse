@@ -1,20 +1,20 @@
 <template>
-  <div class="home">
-    <form @on:submit.prevent>
-      <div class="field">
-        <label for="usermane">Username</label>
-        <input type="text" v-model="username" @change="updateUsername"/>
-      </div>
-    </form>
+  <div>
+    <header>
+      <h1>Triviacalypse</h1>
+      <span class="header-subtitle">Covid-19 Edition</span>
+    </header>
 
-    <ul v-if="games" class="games">
-      <li v-for="game in games" :key="game.id">
-        <router-link :to="{name: 'game', params: {id: game.id}}">
-          {{ game.id }} ({{ game.player_count }})
-        </router-link>
-      </li>
-    </ul>
-    <p v-else>Loading games…</p>
+    <main class="container">
+      <h2>Username</h2>
+
+      <form @on:submit.prevent>
+        <input type="text" v-model="username" @change="updateUsername"/>
+      </form>
+
+      <h2>Games</h2>
+      <games :games="games"/>
+    </main>
 
     <t-buttons>
       <t-button @action="newGame">New Game</t-button>
@@ -27,6 +27,8 @@ import storage from "../storage"
 import socket from "../socket"
 import api from "../api"
 import _ from "lodash"
+
+import Games from "../components/games"
 
 export default
   data: ->
@@ -79,10 +81,7 @@ export default
       params = {}
       api.createGame(params).then (game) =>
         @$router.push(name: "game", params: {id: game.id})
-</script>
 
-<style lang="scss">
-h2 {
-  color: #666;
-}
-</style>
+  components:
+    "games": Games
+</script>

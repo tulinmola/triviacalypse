@@ -1,0 +1,13 @@
+@keyframes placeholder-blinker {
+  50% { opacity: 1; }
+}
+
+@keyframes click-animation {
+  2% {
+   transform: scale(1.2, 1.2);
+  }
+
+  100% {
+    transform: scale(1, 1);
+  }
+}

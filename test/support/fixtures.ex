@@ -5,13 +5,18 @@ defmodule Triviacalypse.Fixtures do
   @type player :: Player.t()
   @type question :: Question.t()
 
-  @spec create_game([player]) :: game
-  def create_game(players \\ []) do
+  @spec create_game(map) :: game
+  def create_game(attrs \\ %{}) do
+    players = Map.get(attrs, :players, [])
+
     {:ok, game} =
       %Game{
         id: UUID.uuid4(),
+        creator_id: UUID.uuid4(),
+        creator_username: "testuser",
         player_count: length(players),
-        players: Map.new(players, &{&1.id, &1})
+        players: Map.new(players, &{&1.id, &1}),
+        inserted_at: now()
       }
       |> Triviacalypse.create_game()
 
@@ -28,9 +33,15 @@ defmodule Triviacalypse.Fixtures do
     %Question{
       category: "General Knowledge",
       difficulty: "easy",
+      score: 1,
       text: "test",
       correct_answer: "yes",
       incorrect_answers: ["no"]
     }
+  end
+
+  defp now do
+    {:ok, datetime} = DateTime.now("Etc/UTC")
+    datetime
   end
 end

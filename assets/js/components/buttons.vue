@@ -1,15 +1,14 @@
 <template>
-  <ul class="buttons">
-    <slot></slot>
-  </ul>
+  <footer>
+    <ul class="buttons container">
+      <slot></slot>
+    </ul>
+  </footer>
 </template>
 
 <script lang="coffee">
 export default {}
 </script>
 
-<style>
-.buttons {
-  background-color: #f00;
-}
+<style lang="scss">
 </style>

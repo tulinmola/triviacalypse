@@ -2,14 +2,14 @@ defmodule TriviacalypseWeb.GameChannel do
   use TriviacalypseWeb, :channel
 
   alias Triviacalypse.Player
-  alias TriviacalypseWeb.{GameView, PlayerView}
+  alias TriviacalypseWeb.GameView
 
   @type topic :: binary
   @type event :: binary
   @type socket :: Phoenix.Socket.t()
 
   @impl true
-  @spec join(topic, map, socket) :: {:ok, map, socket}
+  @spec join(topic, map, socket) :: {:ok, map, socket} | {:error, reason :: map}
   def join("game:lobby", _payload, socket) do
     games = Triviacalypse.list_games()
 
@@ -20,25 +20,34 @@ defmodule TriviacalypseWeb.GameChannel do
     {:ok, response, socket}
   end
 
-  def join("game:" <> game_id, %{"user_id" => user_id, "username" => username}, socket) do
-    player = %Player{id: user_id, username: username}
-    send(self(), {:after_join, player})
+  def join("game:" <> id, %{"user_id" => user_id, "username" => username}, socket) do
+    case Triviacalypse.get_game(id) do
+      {:ok, pid} ->
+        player = %Player{id: user_id, username: username}
+        send(self(), {:after_join, player})
 
-    players =
-      game_id
-      |> Triviacalypse.list_game_players()
-      |> Enum.map(&PlayerView.render("player.json", %{player: &1}))
+        players =
+          pid
+          |> Triviacalypse.list_game_players()
+          |> Map.new(&{&1.id, &1})
 
-    response = %{
-      players: players
-    }
+        game =
+          pid
+          |> Triviacalypse.GameServer.game()
+          |> Map.put(:players, players)
 
-    socket =
-      socket
-      |> assign(:game_id, game_id)
-      |> assign(:user_id, user_id)
+        response = GameView.render("game.json", %{game: game})
 
-    {:ok, response, socket}
+        socket =
+          socket
+          |> assign(:game_id, id)
+          |> assign(:user_id, user_id)
+
+        {:ok, response, socket}
+
+      {:error, :not_found} ->
+        {:error, %{reason: "not_found"}}
+    end
   end
 
   @impl true

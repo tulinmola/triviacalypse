@@ -3,7 +3,10 @@ defmodule TriviacalypseWeb.GameControllerTest do
 
   alias Triviacalypse.GameRepo
 
-  @create_attrs %{}
+  @create_attrs %{
+    "creator_id" => UUID.uuid4(),
+    "creator_username" => "test-username"
+  }
 
   setup %{} do
     GameRepo.delete_all()
