@@ -1,32 +1,33 @@
 <template>
   <div>
     <template v-if="question">
-      <question v-if="question" :question="question" class="container"/>
+      <question v-if="question" ref="question" :question="question" class="container" @answer="setAnswer"/>
+
+      <answers ref="answers"/>
     </template>
-    <template v-else>
-      <header>
-        <h1>New Game</h1>
-        <span class="header-subtitle">
-          <template v-if="isOwner">Waiting for players</template>
-          <template v-else>Waiting for creator</template>
-        </span>
-      </header>
 
-      <main class="container">
-        <t-connection-error v-if="retrying"/>
+    <header v-else>
+      <h1>New Game</h1>
+      <span class="header-subtitle">
+        <template v-if="isOwner">Waiting for players</template>
+        <template v-else>Waiting for creator</template>
+      </span>
+    </header>
 
-        <h2>Players</h2>
-        <players :players="players"/>
-      </main>
+    <main class="container">
+      <t-connection-error v-if="retrying"/>
 
-      <t-buttons>
-        <t-button>Invite Friends</t-button>
-        <template v-if="isOwner">
-          <t-button @action="start" :type="isNotAlone? 'primary': 'secondary'">Start Game</t-button>
-          <t-button @action="$router.replace({name: 'home'})" type="secondary danger">Delete Game</t-button>
-        </template>
-      </t-buttons>
-    </template>
+      <h2>Players</h2>
+      <players :players="players"/>
+    </main>
+
+    <t-buttons v-if="game && !question">
+      <t-button>Invite Friends</t-button>
+      <template v-if="isOwner">
+        <t-button @action="start" :type="isNotAlone? 'primary': 'secondary'">Start Game</t-button>
+        <t-button @action="$router.replace({name: 'home'})" type="secondary danger">Delete Game</t-button>
+      </template>
+    </t-buttons>
 
     <t-overlay v-if="notFound">
       <h2 slot="header">Game not found</h2>
@@ -53,6 +54,7 @@ import _ from "lodash"
 
 import Players from "../components/players"
 import Question from "../components/question"
+import Answers from "../components/answers"
 
 export default
   data: ->
@@ -67,6 +69,10 @@ export default
 
   beforeDestroy: ->
     @channel.leave()
+
+  watch:
+    question: ->
+      @$refs.answers?.reset()
 
   computed:
     id: ->
@@ -86,7 +92,6 @@ export default
 
     isOwner: ->
       @currentUser.id == @creatorId
-
   methods:
     join: ->
       payload =
@@ -101,11 +106,11 @@ export default
 
       @channel.on("player", @onPlayer)
       @channel.on("question", @onQuestion)
+      @channel.on("answered", @onAnswered)
+      @channel.on("correct_answer", @onCorrectAnswer)
 
-    onJoin: (response) ->
-      @game = response
+    onJoin: ({@game, @question}) ->
       @retrying = false
-      player.score = parseInt(Math.random() * 40) for player in @players
 
     onChannelError: (response) ->
       switch response.reason
@@ -127,10 +132,23 @@ export default
 
     onQuestion: (@question) ->
 
+    onAnswered: ({id}) ->
+      player = @findPlayer(id)
+      @$refs.answers?.push(player)
+
+    onCorrectAnswer: ({value, count}) ->
+      console.log "#{count} correct answers"
+      @$refs.question?.setCorrectAnswer(value)
+
     start: ->
       api.startGame(@game)
+
+    setAnswer: (value) ->
+      @currentAnswer = value
+      @channel.push("answer", {value})
 
   components:
     "players": Players
     "question": Question
+    "answers": Answers
 </script>

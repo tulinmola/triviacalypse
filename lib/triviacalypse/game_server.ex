@@ -1,20 +1,12 @@
 defmodule Triviacalypse.GameServer do
   use GenServer, restart: :transient
 
-  alias Triviacalypse.{Game, GameServer, Player, QuestionPool}
-  alias TriviacalypseWeb.{Endpoint, GameView, PlayerView, QuestionView}
+  alias Triviacalypse.{Game, Gameplay, GameServer, Player, Question}
 
   @type game :: Game.t()
   @type player :: Player.t()
-
-  @type t :: %GameServer{
-          game: game,
-          topic: binary
-        }
-
-  defstruct [:game, :topic]
-
-  @lobby_topic "game:lobby"
+  @type question :: Question.t()
+  @type gameplay :: Gameplay.t()
 
   @spec start_link([{:game, game}]) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -37,9 +29,19 @@ defmodule Triviacalypse.GameServer do
     GenServer.call(pid, :game)
   end
 
+  @spec question(pid) :: question | nil
+  def question(pid) do
+    GenServer.call(pid, :question)
+  end
+
   @spec start(pid) :: :ok
   def start(pid) do
     GenServer.cast(pid, :start)
+  end
+
+  @spec answer(pid, binary, binary) :: :ok
+  def answer(pid, player_id, value) do
+    GenServer.cast(pid, {:answer, player_id, value})
   end
 
   @spec kill(pid) :: :ok
@@ -48,71 +50,57 @@ defmodule Triviacalypse.GameServer do
   end
 
   @impl true
-  @spec init(game) :: {:ok, t}
+  @spec init(game) :: {:ok, gameplay}
   def init(game) do
-    topic = "game:#{game.id}"
-    server = %GameServer{game: game, topic: topic}
-
-    broadcast_game!(server, game)
-
-    {:ok, server}
+    {:ok, Gameplay.new(game)}
   end
 
   @impl true
-  def handle_call(:players, _from, server) do
+  def handle_call(:players, _from, state) do
     # TODO if there are a million players this should return only
     # a couple of them and a precalculated count.
-    players = Map.values(server.game.players)
-    {:reply, players, server}
+    players = Map.values(state.game.players)
+    {:reply, players, state}
   end
 
   @impl true
-  def handle_call({:add_player, player}, _from, server) do
-    unless Game.player?(server.game, player) do
-      game = Game.add_player(server.game, player)
-      broadcast_player!(server, player)
-      broadcast_game!(server, game)
-      {:reply, player, %GameServer{server | game: game}}
-    else
-      {:reply, player, server}
-    end
+  def handle_call({:add_player, player}, _from, state) do
+    {:reply, player, Gameplay.add_player(state, player)}
   end
 
   @impl true
-  def handle_call(:game, _from, server) do
-    response = %Game{server.game | players: %{}}
-    {:reply, response, server}
+  def handle_call(:game, _from, state) do
+    response = %Game{state.game | players: %{}}
+    {:reply, response, state}
   end
 
   @impl true
-  def handle_call(:kill, _from, server) do
-    {:stop, :normal, :ok, server}
+  def handle_call(:question, _from, state) do
+    {:reply, state.question, state}
   end
 
   @impl true
-  def handle_cast(:start, server) do
-    {:ok, question} = QuestionPool.get()
-    broadcast_question!(server, question)
-    {:noreply, server}
+  def handle_call(:kill, _from, state) do
+    {:stop, :normal, :ok, state}
   end
 
   @impl true
-  def terminate(_reason, _server) do
-    # IO.inspect({:terminate, reason, server})
+  def handle_cast(:start, state) do
+    {:noreply, Gameplay.start(state)}
   end
 
-  defp broadcast_game!(_server, game) do
-    message = GameView.render("game.json", %{game: game})
-    :ok = Endpoint.broadcast(@lobby_topic, "game", message)
+  @impl true
+  def handle_cast({:answer, player_id, value}, state) do
+    {:noreply, Gameplay.answer(state, player_id, value)}
   end
 
-  defp broadcast_player!(server, player) do
-    message = PlayerView.render("player.json", %{player: player})
-    :ok = Endpoint.broadcast(server.topic, "player", message)
+  @impl true
+  def handle_info(:new_question, state) do
+    {:noreply, Gameplay.new_question(state)}
   end
 
-  defp broadcast_question!(server, question) do
-    message = QuestionView.render("question.json", %{question: question})
-    :ok = Endpoint.broadcast(server.topic, "question", message)
+  @impl true
+  def terminate(_reason, _state) do
+    # IO.inspect({:terminate, reason, state})
   end
 end

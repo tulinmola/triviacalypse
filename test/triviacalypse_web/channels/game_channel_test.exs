@@ -29,7 +29,7 @@ defmodule TriviacalypseWeb.GameChannelTest do
 
     payload = %{user_id: UUID.uuid4(), username: "test"}
 
-    assert {:ok, %{players: players}, socket} =
+    assert {:ok, %{game: %{players: players}}, socket} =
              UserSocket
              |> socket("user_id", %{some: :assign})
              |> subscribe_and_join(GameChannel, "game:#{game.id}", payload)

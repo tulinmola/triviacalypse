@@ -1,11 +1,13 @@
 defmodule Triviacalypse.Game do
   alias Triviacalypse.{Game, Player}
 
+  @type status :: :waiting | :playing | :ended
   @type player :: Player.t()
   @type datetime :: DateTime.t()
 
   @type t :: %Game{
           id: binary,
+          status: status,
           creator_id: binary,
           creator_username: binary,
           inserted_at: datetime,
@@ -18,6 +20,7 @@ defmodule Triviacalypse.Game do
                        |> DateTime.from_naive!("Etc/UTC")
 
   defstruct id: "",
+            status: :waiting,
             creator_id: "",
             creator_username: "",
             inserted_at: @default_inserted_at,
@@ -47,4 +50,17 @@ defmodule Triviacalypse.Game do
   def player?(game, player_id) do
     Map.has_key?(game.players, player_id)
   end
+
+  @spec update_status(t, status) :: t
+  def update_status(game, status) do
+    %Game{game | status: status}
+  end
+
+  # def update_status(%Game{status: :waiting} = game, :playing) do
+  #   %Game{game | status: :playing}
+  # end
+
+  # def update_status(%Game{status: :playing} = game, :ended) do
+  #   %Game{game | status: :ended}
+  # end
 end

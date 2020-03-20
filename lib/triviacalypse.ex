@@ -46,21 +46,28 @@ defmodule Triviacalypse do
     game
   end
 
-  @spec list_game_players(binary | pid) :: [player]
-  def list_game_players(game_id) when is_binary(game_id) do
+  @spec list_players(binary | pid) :: [player]
+  def list_players(game_id) when is_binary(game_id) do
     game_id
     |> get_game!()
-    |> list_game_players()
+    |> list_players()
   end
 
-  def list_game_players(game) do
+  def list_players(game) do
     GameServer.players(game)
   end
 
-  @spec add_game_player(binary, player) :: player
-  def add_game_player(game_id, player) do
+  @spec add_player(binary, player) :: player
+  def add_player(game_id, player) do
     game_id
     |> get_game!()
     |> GameServer.add_player(player)
+  end
+
+  @spec answer_game(binary, binary, binary) :: :ok
+  def answer_game(game_id, player_id, value) do
+    game_id
+    |> get_game!()
+    |> GameServer.answer(player_id, value)
   end
 end

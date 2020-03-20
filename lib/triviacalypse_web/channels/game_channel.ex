@@ -2,7 +2,7 @@ defmodule TriviacalypseWeb.GameChannel do
   use TriviacalypseWeb, :channel
 
   alias Triviacalypse.Player
-  alias TriviacalypseWeb.GameView
+  alias TriviacalypseWeb.{GameView, QuestionView}
 
   @type topic :: binary
   @type event :: binary
@@ -28,7 +28,7 @@ defmodule TriviacalypseWeb.GameChannel do
 
         players =
           pid
-          |> Triviacalypse.list_game_players()
+          |> Triviacalypse.list_players()
           |> Map.new(&{&1.id, &1})
 
         game =
@@ -36,12 +36,17 @@ defmodule TriviacalypseWeb.GameChannel do
           |> Triviacalypse.GameServer.game()
           |> Map.put(:players, players)
 
-        response = GameView.render("game.json", %{game: game})
+        question = Triviacalypse.GameServer.question(pid)
+
+        response = %{
+          game: render_game(game),
+          question: render_question(question)
+        }
 
         socket =
           socket
           |> assign(:game_id, id)
-          |> assign(:user_id, user_id)
+          |> assign(:player_id, user_id)
 
         {:ok, response, socket}
 
@@ -51,9 +56,26 @@ defmodule TriviacalypseWeb.GameChannel do
   end
 
   @impl true
+  @spec handle_in(binary, map, socket) :: {:noreply, socket}
+  def handle_in("answer", %{"value" => value}, socket) do
+    Triviacalypse.answer_game(socket.assigns.game_id, socket.assigns.player_id, value)
+    {:noreply, socket}
+  end
+
+  @impl true
   @spec handle_info(any, socket) :: {:noreply, socket}
   def handle_info({:after_join, player}, socket) do
-    Triviacalypse.add_game_player(socket.assigns.game_id, player)
+    Triviacalypse.add_player(socket.assigns.game_id, player)
     {:noreply, socket}
+  end
+
+  defp render_game(game) do
+    GameView.render("game.json", %{game: game})
+  end
+
+  defp render_question(nil), do: nil
+
+  defp render_question(question) do
+    QuestionView.render("question.json", %{question: question})
   end
 end
