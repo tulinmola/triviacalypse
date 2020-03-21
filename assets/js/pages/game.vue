@@ -22,7 +22,7 @@
     </main>
 
     <t-buttons v-if="game && !question">
-      <t-button>Invite Friends</t-button>
+      <t-button @action="share">Invite Friends</t-button>
       <template v-if="isOwner">
         <t-button @action="start" :type="isNotAlone? 'primary': 'secondary'">Start Game</t-button>
         <t-button @action="$router.replace({name: 'home'})" type="secondary danger">Delete Game</t-button>
@@ -49,6 +49,7 @@
 <script lang="coffee">
 import socket from "../socket"
 import storage from "../storage"
+import share from "../share"
 import api from "../api"
 import _ from "lodash"
 
@@ -139,6 +140,9 @@ export default
     onCorrectAnswer: ({value, count}) ->
       console.log "#{count} correct answers"
       @$refs.question?.setCorrectAnswer(value)
+
+    share: ->
+      share.url(window.location.href)
 
     start: ->
       api.startGame(@game)
