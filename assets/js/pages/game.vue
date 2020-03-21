@@ -137,9 +137,8 @@ export default
       player = @findPlayer(id)
       @$refs.answers?.push(player)
 
-    onCorrectAnswer: ({value, count}) ->
-      console.log "#{count} correct answers"
-      @$refs.question?.setCorrectAnswer(value)
+    onCorrectAnswer: ({value, counts}) ->
+      @$refs.question?.setCorrectAnswer(value, counts)
 
     share: ->
       share.url(window.location.href)

@@ -9,6 +9,7 @@
     <ul class="question-answers">
       <li v-for="(answer, index) in answers" :key="'answer-' + index" :class="answerClass(answer)">
         <a v-html="answer" @click.prevent="setCurrentAnswer(answer)" href="#"/>
+        <span>{{ counts[answer] }}</span>
       </li>
     </ul>
   </div>
@@ -26,6 +27,7 @@ export default
     startTime: null
     progress: 0
     correctAnswer: null
+    counts: {}
 
   mounted: ->
     @$nextTick =>
@@ -38,6 +40,7 @@ export default
       @progress = 0
       @currentAnswer = null
       @correctAnswer = null
+      @counts = {}
 
   beforeDestroy: ->
     clearInterval(@interval) if @interval
@@ -74,7 +77,7 @@ export default
       correct: @correctAnswer == answer
       wrong: @correctAnswer && @currentAnswer == answer && @currentAnswer != @correctAnswer
 
-    setCorrectAnswer: (@correctAnswer) ->
+    setCorrectAnswer: (@correctAnswer, @counts) ->
 
     updateProgress: ->
       return if @correctAnswer
@@ -138,6 +141,7 @@ export default
   $border-color: rgba($primary-color, 0.1);
 
   li {
+    position: relative;
     border-top: 1px solid $border-color;
     transition: color $transition-time, background-color $transition-time;
 
@@ -148,6 +152,10 @@ export default
     &:hover, &.current {
       background-color: $accent-color;
       color: $background-color;
+
+      span {
+        background-color: mix($accent-color, $background-color, 50%);
+      }
     }
 
     &.current {
@@ -156,10 +164,18 @@ export default
 
     &.correct {
       background-color: $success-color;
+
+      span {
+        background-color: mix($success-color, $background-color, 50%);
+      }
     }
 
     &.wrong {
       background-color: $danger-color;
+
+      span {
+        background-color: mix($danger-color, $background-color, 50%);
+      }
     }
 
     &.correct, &.wrong {
@@ -173,6 +189,25 @@ export default
     color: inherit;
     text-decoration: none;
     padding: $padding $padding;
+  }
+
+  span {
+    display: inline-block;
+    position: absolute;
+    left: $padding;
+    top: 50%;
+    background-color: mix($primary-color, $background-color, 50%);
+    color: $background-color;
+    font-size: 11px;
+    font-weight: $bold-weight;
+    line-height: 22px;
+    padding: 0 6px;
+    margin-top: -11px;
+    border-radius: 11px;
+
+    &:empty {
+      display: none;
+    }
   }
 }
 

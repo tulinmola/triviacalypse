@@ -39,10 +39,10 @@ defmodule TriviacalypseWeb.GameBroadcaster do
     :ok = Endpoint.broadcast(topic, "answered", message)
   end
 
-  @spec broadcast_correct_answer!(game, question, integer) :: :ok
-  def broadcast_correct_answer!(game, question, count) do
+  @spec broadcast_correct_answer!(game, question, map) :: :ok
+  def broadcast_correct_answer!(game, question, counts) do
     topic = topic(game)
-    message = %{value: question.correct_answer, count: count}
+    message = %{value: question.correct_answer, counts: counts}
     :ok = Endpoint.broadcast(topic, "correct_answer", message)
   end
 end

@@ -72,22 +72,25 @@ defmodule Triviacalypse.Gameplay do
     %{game: game, answers: answers, question: question} = gameplay
     %{correct_answer: correct_answer, score: score} = question
 
-    {players, count} = Enum.reduce(answers, {game.players, 0}, fn {player_id, answer}, {players, count} ->
-      if answer == correct_answer do
-        player =
-          game.players
-          |> Map.get(player_id)
-          |> Player.add_score(score)
+    {players, counts} = Enum.reduce(answers, {game.players, %{}}, fn {player_id, answer}, {players, counts} ->
+      players =
+        if answer == correct_answer do
+          player =
+            game.players
+            |> Map.get(player_id)
+            |> Player.add_score(score)
 
-        Broadcaster.broadcast_player!(game, player)
+          Broadcaster.broadcast_player!(game, player)
 
-        {Map.put(players, player_id, player), count + 1}
-      else
-        {players, count}
-      end
+          Map.put(players, player_id, player)
+        else
+          players
+        end
+
+      {players, Map.update(counts, answer, 1, & (&1 + 1))}
     end)
 
-    Broadcaster.broadcast_correct_answer!(game, question, count)
+    Broadcaster.broadcast_correct_answer!(game, question, counts)
     Process.send_after(self(), :new_question, @time_between_questions)
 
     %Gameplay{gameplay | game: %Game{gameplay.game | players: players}}
