@@ -11,4 +11,11 @@ defmodule TriviacalypseWeb.GameController do
       |> render("show.json", game: game)
     end
   end
+
+  @spec delete(conn, map) :: conn
+  def delete(conn, %{"id" => id}) do
+    with {:ok, _game} <- Triviacalypse.delete_game(id) do
+      send_resp(conn, :no_content, "")
+    end
+  end
 end

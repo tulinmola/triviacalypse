@@ -25,7 +25,7 @@
       <t-button @action="share">Invite Friends</t-button>
       <template v-if="isOwner">
         <t-button @action="start" :type="isNotAlone? 'primary': 'secondary'">Start Game</t-button>
-        <t-button @action="$router.replace({name: 'home'})" type="secondary danger">Delete Game</t-button>
+        <t-button @action="destroy" type="secondary danger">Delete Game</t-button>
       </template>
     </t-buttons>
 
@@ -35,7 +35,8 @@
       <template slot="body">
         <p>
           Ops! We didn't find the game you were looking for. Maybe
-          it ended and now it doesn't exist anymore…
+          it was deleted or simply ended, and now it doesn't exist
+          anymore…
         </p>
 
         <router-link :to="{name: 'home'}" class="overlay-button">
@@ -109,6 +110,7 @@ export default
       @channel.on("question", @onQuestion)
       @channel.on("answered", @onAnswered)
       @channel.on("correct_answer", @onCorrectAnswer)
+      @channel.on("delete", @onDelete)
 
     onJoin: ({@game, @question}) ->
       @retrying = false
@@ -140,11 +142,19 @@ export default
     onCorrectAnswer: ({value, counts}) ->
       @$refs.question?.setCorrectAnswer(value, counts)
 
+    onDelete: ->
+      @notFound = true
+
     share: ->
       share.url(window.location.href)
 
     start: ->
       api.startGame(@game)
+
+    destroy: ->
+      @channel.leave()
+      api.deleteGame(@game).then =>
+        @$router.replace({name: 'home'})
 
     setAnswer: (value) ->
       @currentAnswer = value

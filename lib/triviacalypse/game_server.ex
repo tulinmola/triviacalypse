@@ -81,7 +81,7 @@ defmodule Triviacalypse.GameServer do
 
   @impl true
   def handle_call(:kill, _from, state) do
-    {:stop, :normal, :ok, state}
+    {:stop, :normal, Gameplay.delete(state), state}
   end
 
   @impl true

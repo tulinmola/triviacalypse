@@ -31,4 +31,7 @@ export default
       creator_username: user.username
     post("/games", game: params)
 
+  deleteGame: (game) ->
+    doDelete("/games/#{game.id}")
+
   startGame: (game) -> post("/games/#{game.id}/start")

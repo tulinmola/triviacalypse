@@ -63,6 +63,7 @@ export default
         .receive("error", @onChannelError)
 
       @channel.on("game", @onGame)
+      @channel.on("delete", @onDelete)
 
     setUsername: ->
       {@username} = @currentUser
@@ -86,6 +87,10 @@ export default
         _.extend(current, game)
       else
         @games.unshift(game)
+
+    onDelete: (game) ->
+      index = _.findIndex(@games, {id: game.id})
+      @games.splice(index, 1) if index >= 0
 
     newGame: ->
       params = {}
