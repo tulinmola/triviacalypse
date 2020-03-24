@@ -18,8 +18,18 @@
         <input type="text" v-model="username" @change="updateUsername"/>
       </form>
 
-      <h2>Games</h2>
-      <games :games="games"/>
+      <h2>New games</h2>
+      <games :games="pendingGames"/>
+
+      <template v-if="startedGames.length">
+        <h2>Already started games</h2>
+        <games :games="startedGames"/>
+      </template>
+
+      <template v-if="finishedGames.length">
+        <h2>Finished games</h2>
+        <games :games="finishedGames"/>
+      </template>
     </main>
 
     <t-buttons>
@@ -54,6 +64,15 @@ export default
     currentUser: ->
       storage.getCurrentUser()
 
+    pendingGames: ->
+      @filterGames("waiting")
+
+    startedGames: ->
+      @filterGames("playing")
+
+    finishedGames: ->
+      @filterGames("finished")
+
   methods:
     join: ->
       @channel = socket.channel("game:lobby", {})
@@ -77,6 +96,9 @@ export default
 
     onChannelError: (response) ->
       console.error "error", response
+
+    filterGames: (status) ->
+      _.filter(@games, {status: status})
 
     findGame: (id) ->
       _.find(@games, id: id)

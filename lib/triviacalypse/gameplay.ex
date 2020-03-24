@@ -43,13 +43,15 @@ defmodule Triviacalypse.Gameplay do
   end
 
   @spec start(t) :: t
-  def start(gameplay) do
+  def start(%{game: %{status: :waiting}} = gameplay) do
     game = Game.update_status(gameplay.game, :playing)
 
     Process.send_after(self(), :new_question, 0)
 
     %Gameplay{gameplay | game: game}
   end
+
+  def start(gameplay), do: gameplay
 
   @spec answer(t, binary, binary) :: t
   def answer(gameplay, player_id, value) do

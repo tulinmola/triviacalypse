@@ -1,7 +1,7 @@
 defmodule Triviacalypse.Game do
   alias Triviacalypse.{Game, Player}
 
-  @type status :: :waiting | :playing | :ended
+  @type status :: :waiting | :playing | :finished
   @type player :: Player.t()
   @type datetime :: DateTime.t()
 
@@ -52,15 +52,11 @@ defmodule Triviacalypse.Game do
   end
 
   @spec update_status(t, status) :: t
-  def update_status(game, status) do
-    %Game{game | status: status}
+  def update_status(%Game{status: :waiting} = game, :playing) do
+    %Game{game | status: :playing}
   end
 
-  # def update_status(%Game{status: :waiting} = game, :playing) do
-  #   %Game{game | status: :playing}
-  # end
-
-  # def update_status(%Game{status: :playing} = game, :ended) do
-  #   %Game{game | status: :ended}
-  # end
+  def update_status(%Game{status: :playing} = game, :finished) do
+    %Game{game | status: :ended}
+  end
 end

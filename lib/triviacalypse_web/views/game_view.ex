@@ -16,6 +16,7 @@ defmodule TriviacalypseWeb.GameView do
 
     %{
       id: game.id,
+      status: game.status,
       creator_id: game.creator_id,
       creator_username: game.creator_username,
       player_count: game.player_count,
