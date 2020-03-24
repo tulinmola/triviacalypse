@@ -29,7 +29,8 @@ export default {}
   background-color: rgba($primary-color, 0.9);
   color: $inverted-primary-color;
   display: table;
-  transition: opacity .3s ease;
+  transform: translate(0, 0);
+  transition: all 1s ease;
 }
 
 .overlay-container {
@@ -42,6 +43,17 @@ export default {}
 
   p {
     padding: 0 $padding $margin;
+
+    a {
+      color: inherit;
+      font-weight: $medium-weight;
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
 

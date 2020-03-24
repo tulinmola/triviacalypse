@@ -1,8 +1,14 @@
 <template>
   <div>
     <header>
-      <h1>Triviacalypse</h1>
-      <span class="header-subtitle">Covid-19 Edition</span>
+      <div class="container">
+        <h1>Triviacalypse</h1>
+        <span class="header-subtitle">Covid-19 Edition</span>
+
+        <a @click.prevent="showInfo=true" href="#" class="header-icon header-icon-right">
+          <i class="fas fa-info-circle"></i>
+        </a>
+      </div>
     </header>
 
     <main class="container">
@@ -19,6 +25,8 @@
     <t-buttons>
       <t-button @action="newGame">New Game</t-button>
     </t-buttons>
+
+    <info v-if="showInfo" @close="showInfo = false"/>
   </div>
 </template>
 
@@ -29,11 +37,13 @@ import api from "../api"
 import _ from "lodash"
 
 import Games from "../components/games"
+import Info from "../components/info"
 
 export default
   data: ->
     username: null
     games: null
+    showInfo: false
 
   mounted: ->
     @$nextTick =>
@@ -84,4 +94,5 @@ export default
 
   components:
     "games": Games
+    "info": Info
 </script>

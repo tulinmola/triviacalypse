@@ -25,12 +25,42 @@ header {
   text-align: center;
   border-bottom: 1px solid rgba($primary-color, 0.1);
   background-color: rgba($base-color, 0.9);
+
+  .container {
+    padding-top: 11px;
+    position: relative;
+  }
+}
+
+.header-icon {
+  display: block;
+  position: absolute;
+  top: 8px;
+  font-size: 28px;
+  line-height: 48px;
+  width: 48px;
+  text-align: center;
+  color: $secondary-color;
+  border-radius: 50%;
+  transition: color $transition-time, background-color $transition-time;
+
+  &:hover {
+    color: $primary-color;
+    background-color: mix($background-color, $secondary-color, 90%);
+  }
+}
+
+.header-icon-left {
+  left: $padding * 0.5;
+}
+
+.header-icon-right {
+  right: $padding * 0.5;
 }
 
 h1 {
   font-size: 21px;
   line-height: 22px;
-  margin-top: 11px;
   font-weight: $medium-weight;
 }
 
