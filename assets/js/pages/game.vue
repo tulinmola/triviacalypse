@@ -7,11 +7,17 @@
     </template>
 
     <header v-else>
-      <h1>New Game</h1>
-      <span class="header-subtitle">
-        <template v-if="isOwner">Waiting for players</template>
-        <template v-else>Waiting for creator</template>
-      </span>
+      <div class="container">
+        <h1>New Game</h1>
+        <span class="header-subtitle">
+          <template v-if="isOwner">Waiting for players</template>
+          <template v-else>Waiting for creator to start</template>
+        </span>
+
+        <router-link :to="{name: 'home'}" class="header-icon header-icon-left">
+          <i class="fas fa-chevron-circle-left"></i>
+        </router-link>
+      </div>
     </header>
 
     <main class="container">
