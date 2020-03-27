@@ -10,7 +10,7 @@
       </p>
 
       <p>
-        Ir you have a curious mind the source code is available at
+        If you have a curious mind the source code is available at
         <a href="https://github.com/tulinmola/triviacalypse">
           <i class="fab fa-github"></i> GitHub
         </a>. It is developed using
