@@ -149,7 +149,16 @@ export default
       border-bottom: 1px solid $border-color;
     }
 
-    &:hover, &.current {
+    @include hover {
+      background-color: $accent-color;
+      color: $background-color;
+
+      span {
+        background-color: mix($accent-color, $background-color, 50%);
+      }
+    }
+
+    &.current {
       background-color: $accent-color;
       color: $background-color;
 

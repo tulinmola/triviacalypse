@@ -44,7 +44,7 @@ header {
   border-radius: 50%;
   transition: color $transition-time, background-color $transition-time;
 
-  &:hover {
+  @include hover {
     color: $primary-color;
     background-color: mix($background-color, $secondary-color, 90%);
   }

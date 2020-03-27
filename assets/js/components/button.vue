@@ -46,7 +46,7 @@ export default
   border: 1px solid $accent-color;
   color: $inverted-primary-color;
 
-  &:hover, &:active {
+  @include hover {
     background-color: $background-color;
     color: $accent-color;
   }
@@ -57,7 +57,7 @@ export default
   background-color: $background-color;
   color: $accent-color;
 
-  &:hover, &:active {
+  @include hover {
     background-color: $accent-color;
     color: $inverted-primary-color;
   }
@@ -66,7 +66,7 @@ export default
     color: $danger-color;
     border-color: $danger-color;
 
-    &:hover, &:active {
+    @include hover {
       background-color: $danger-color;
       color: $inverted-primary-color;
     }

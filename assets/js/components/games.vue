@@ -84,7 +84,7 @@ export default
     color: inherit;
     transition: color $transition-time, background-color $transition-time;
 
-    &:hover, &:active {
+    @include hover {
       background-color: $accent-color;
       color: $background-color;
 

@@ -56,6 +56,7 @@ module.exports = (env, options) => ({
             options: {
               data: `
                 @import "./css/_settings.scss";
+                @import "./css/_mixins.scss";
               `
             }
           }
