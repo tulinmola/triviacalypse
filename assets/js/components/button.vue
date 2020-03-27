@@ -1,6 +1,6 @@
 <template>
   <li :class="klass">
-    <a href="#" @click.prevent="$emit('action')">
+    <a href="#" @click.prevent="$emit('action')" ontouchstart="">
       <slot></slot>
     </a>
   </li>

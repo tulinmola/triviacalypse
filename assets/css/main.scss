@@ -8,6 +8,7 @@ body {
   background-color: $background-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
 *, :after, :before {
@@ -47,6 +48,10 @@ header {
   @include hover {
     color: $primary-color;
     background-color: mix($background-color, $secondary-color, 90%);
+  }
+
+  &:active {
+    animation: click-animation 2s;
   }
 }
 
@@ -120,6 +125,13 @@ input {
   font-size: 16px;
   line-height: 40px;
   margin: $padding * 0.5 0;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border $transition-time;
+
+  &:focus {
+    border: 1px solid $accent-color;
+  }
 }
 
 .ellipsis {
