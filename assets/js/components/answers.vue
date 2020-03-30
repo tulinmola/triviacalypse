@@ -33,7 +33,7 @@ export default
       @players = []
 
     push: (player) ->
-      @players.push(player) unless _.find(@players, "username", player.username)
+      @players.push(player) unless _.find(@players, {id: player.id})
 
     getUsername: (player) ->
       if player.id == @currentUser.id then "You" else player.username
