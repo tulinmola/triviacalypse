@@ -8,8 +8,8 @@ defmodule TriviacalypseWeb.StartController do
   action_fallback TriviacalypseWeb.FallbackController
 
   @spec create(conn, map) :: conn
-  def create(conn, %{"game_id" => game_id}) do
-    with :ok <- Triviacalypse.start_game(game_id) do
+  def create(conn, %{"game_id" => game_id, "game" => game_params}) do
+    with :ok <- Triviacalypse.start_game(game_id, game_params) do
       conn
       |> put_status(:created)
       |> put_view(GameView)

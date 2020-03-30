@@ -37,10 +37,10 @@ defmodule Triviacalypse do
     end
   end
 
-  @spec start_game(binary) :: :ok | {:error, any}
-  def start_game(id) do
+  @spec start_game(binary, map) :: :ok | {:error, any}
+  def start_game(id, attrs) do
     case get_game(id) do
-      {:ok, pid} -> GameServer.start(pid)
+      {:ok, pid} -> GameServer.start(pid, attrs)
       {:error, error} -> {:error, error}
     end
   end

@@ -14,7 +14,7 @@ defmodule TriviacalypseWeb.GameChannel do
     games = Triviacalypse.list_games()
 
     response = %{
-      games: Enum.map(games, &GameView.render("game.json", %{game: &1}))
+      games: Enum.map(games, &render_game/1)
     }
 
     {:ok, response, socket}

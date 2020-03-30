@@ -34,4 +34,5 @@ export default
   deleteGame: (game) ->
     doDelete("/games/#{game.id}")
 
-  startGame: (game) -> post("/games/#{game.id}/start")
+  startGame: (game, params) ->
+    post("/games/#{game.id}/start", game: params)

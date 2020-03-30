@@ -8,18 +8,27 @@ defmodule Triviacalypse.Gameplay do
 
   @type t :: %Gameplay{
           game: game,
+          question_count: integer,
           question: question | nil,
           answers: map,
           answer_count: integer
         }
 
-  defstruct [:game, :question, :answers, :answer_count]
+  defstruct [:game, :question_count, :question, :answers, :answer_count]
 
   @time_between_questions 5_000
 
   @spec new(game) :: t
   def new(game) do
-    gameplay = %Gameplay{game: game, answers: %{}, answer_count: 0}
+    question_count = Game.question_count(game)
+
+    gameplay = %Gameplay{
+      game: game,
+      question_count: question_count,
+      answers: %{},
+      answer_count: 0
+    }
+
     Broadcaster.broadcast_game!(game)
     gameplay
   end
@@ -42,13 +51,15 @@ defmodule Triviacalypse.Gameplay do
     end
   end
 
-  @spec start(t) :: t
-  def start(%{game: %{status: :waiting}} = gameplay) do
-    game = Game.update_status(gameplay.game, :playing)
+  @spec start(t, map) :: t
+  def start(%{game: %{status: :waiting}} = gameplay, attrs) do
+    game = Game.start(gameplay.game, attrs)
 
+    Broadcaster.broadcast_game!(game)
     Process.send_after(self(), :new_question, 0)
 
-    %Gameplay{gameplay | game: game}
+    question_count = Game.question_count(game)
+    %Gameplay{gameplay | game: game, question_count: question_count}
   end
 
   def start(gameplay), do: gameplay
@@ -108,13 +119,23 @@ defmodule Triviacalypse.Gameplay do
   defp check_answers(gameplay), do: gameplay
 
   @spec new_question(t) :: t
+  def new_question(%Gameplay{question_count: 0} = gameplay) do
+    game = Game.finish(gameplay.game)
+
+    Broadcaster.broadcast_game!(game)
+    Broadcaster.broadcast_finish!(game)
+
+    %Gameplay{gameplay | game: game, question: nil, answers: %{}}
+  end
+
   def new_question(gameplay) do
     {:ok, question} = QuestionPool.get()
     # TODO send error when no available question? This could
     # happen if question service fails even to retries.
 
+    count = gameplay.question_count - 1
     Broadcaster.broadcast_question!(gameplay.game, question)
 
-    %Gameplay{gameplay | question: question, answers: %{}, answer_count: 0}
+    %Gameplay{gameplay | question: question, question_count: count, answers: %{}, answer_count: 0}
   end
 end

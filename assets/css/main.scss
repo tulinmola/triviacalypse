@@ -19,6 +19,7 @@ body {
 
 header {
   position: fixed;
+  z-index: 10;
   top: 0;
   left: 0;
   width: 100%;
@@ -114,7 +115,7 @@ form {
   padding: 0 $padding;
 }
 
-input {
+input, select {
   display: block;
   font-family: 'Open Sans', sans-serif;
   width: 100%;
@@ -128,9 +129,27 @@ input {
   -webkit-appearance: none;
   outline: none;
   transition: border $transition-time;
+  background-color: rgba(mix($background-color, $primary-color, 40%), 0.01);
 
   &:focus {
     border: 1px solid $accent-color;
+  }
+}
+
+.select {
+  position: relative;
+
+  select, i {
+    cursor: pointer;
+  }
+
+  i {
+    position: absolute;
+    z-index: -1;
+    right: 14px;
+    top: 12px;
+    font-size: 18px;
+    opacity: 0.25;
   }
 }
 
@@ -144,6 +163,7 @@ input {
 
 footer {
   position: fixed;
+  z-index: 10;
   bottom: 0;
   left: 0;
   width: 100%;

@@ -18,6 +18,12 @@ defmodule TriviacalypseWeb.GameBroadcaster do
     :ok = Endpoint.broadcast(@lobby_topic, "game", message)
   end
 
+  @spec broadcast_finish!(game) :: :ok
+  def broadcast_finish!(game) do
+    topic = topic(game)
+    :ok = Endpoint.broadcast(topic, "finish", %{})
+  end
+
   @spec broadcast_delete!(game) :: :ok
   def broadcast_delete!(game) do
     message = %{id: game.id}

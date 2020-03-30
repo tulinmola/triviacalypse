@@ -30,7 +30,7 @@ defmodule TriviacalypseWeb.GameControllerTest do
       assert_receive %Broadcast{
         topic: @lobby_topic,
         event: "game",
-        payload: %{id: ^id}
+        payload: %{id: ^id, creator_username: "test-username"}
       }
     end
   end

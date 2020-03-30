@@ -34,9 +34,9 @@ defmodule Triviacalypse.GameServer do
     GenServer.call(pid, :question)
   end
 
-  @spec start(pid) :: :ok
-  def start(pid) do
-    GenServer.cast(pid, :start)
+  @spec start(pid, map) :: :ok
+  def start(pid, attrs \\ %{}) do
+    GenServer.cast(pid, {:start, attrs})
   end
 
   @spec answer(pid, binary, binary) :: :ok
@@ -85,8 +85,8 @@ defmodule Triviacalypse.GameServer do
   end
 
   @impl true
-  def handle_cast(:start, state) do
-    {:noreply, Gameplay.start(state)}
+  def handle_cast({:start, attrs}, state) do
+    {:noreply, Gameplay.start(state, attrs)}
   end
 
   @impl true

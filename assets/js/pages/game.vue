@@ -8,11 +8,20 @@
 
     <header v-else>
       <div class="container">
-        <h1>New Game</h1>
-        <span class="header-subtitle">
-          <template v-if="isOwner">Waiting for players</template>
-          <template v-else>Waiting for creator to start</template>
-        </span>
+        <template v-if="isWaiting">
+          <h1>New Game</h1>
+          <span class="header-subtitle">
+            <template v-if="isOwner">Waiting for players</template>
+            <template v-else>Waiting for creator to start</template>
+          </span>
+        </template>
+        <template v-else>
+          <h1>Game Finished</h1>
+          <span class="header-subtitle">
+            <template v-if="won">You won!</template>
+            <template v-else>Check your score!</template>
+          </span>
+        </template>
 
         <router-link :to="{name: 'home'}" class="header-icon header-icon-left">
           <i class="fas fa-chevron-circle-left"></i>
@@ -23,11 +32,25 @@
     <main class="container">
       <t-connection-error v-if="retrying"/>
 
+      <template v-if="isWaiting && isOwner">
+        <h2>Duration</h2>
+        <form>
+          <div class="select">
+            <i class="fas fa-caret-down"></i>
+            <select v-model="type">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+        </form>
+      </template>
+
       <h2>Players</h2>
       <players :players="players"/>
     </main>
 
-    <t-buttons v-if="game && !question">
+    <t-buttons v-if="isWaiting">
       <t-button @action="share">Invite Friends</t-button>
       <template v-if="isOwner">
         <t-button @action="start" :type="isNotAlone? 'primary': 'secondary'">Start Game</t-button>
@@ -68,6 +91,7 @@ export default
   data: ->
     game: null
     channel: null
+    type: "medium"
     question: null
     notFound: false
     retrying: false
@@ -86,6 +110,15 @@ export default
     id: ->
       @$route.params.id
 
+    isWaiting: ->
+      @game?.status == "waiting"
+
+    isPlaying: ->
+      @game?.status == "playing"
+
+    isFinished: ->
+      @game?.status == "finished"
+
     players: ->
       @game?.players
 
@@ -100,6 +133,11 @@ export default
 
     isOwner: ->
       @currentUser.id == @creatorId
+
+    won: ->
+      winner = _.maxBy(@players, "score")
+      winner?.id == @currentUser.id
+
   methods:
     join: ->
       payload =
@@ -117,6 +155,7 @@ export default
       @channel.on("answered", @onAnswered)
       @channel.on("correct_answer", @onCorrectAnswer)
       @channel.on("delete", @onDelete)
+      @channel.on("finish", @onFinish)
 
     onJoin: ({@game, @question}) ->
       @retrying = false
@@ -140,6 +179,7 @@ export default
         @players.unshift(player)
 
     onQuestion: (@question) ->
+      @game.status = "playing"
 
     onAnswered: ({id}) ->
       player = @findPlayer(id)
@@ -151,11 +191,15 @@ export default
     onDelete: ->
       @notFound = true
 
+    onFinish: ->
+      @game.status = "finished"
+      @question = null
+
     share: ->
       share.url(window.location.href)
 
     start: ->
-      api.startGame(@game)
+      api.startGame(@game, {@type})
 
     destroy: ->
       @channel.leave()

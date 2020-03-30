@@ -12,6 +12,7 @@ defmodule Triviacalypse.Fixtures do
     {:ok, game} =
       %Game{
         id: UUID.uuid4(),
+        type: :small,
         creator_id: UUID.uuid4(),
         creator_username: "testuser",
         player_count: length(players),
